@@ -1,0 +1,172 @@
+// Email: stas93398@gmail.com
+
+#define _USE_MATH_DEFINES
+#define NOGDI
+
+#include <iostream>
+#include <vector>
+#include <windows.h>
+#include <cmath>
+
+using namespace std;
+
+class Animal {
+public:
+    virtual void sound() {
+        cout << "Тварина видає звук" << endl;
+    }
+
+    virtual ~Animal() {}
+};
+
+class Dog : public Animal {
+public:
+    void sound() override {
+        cout << "Собака: Гав-гав!" << endl;
+    }
+};
+
+class Cat : public Animal {
+public:
+    void sound() override {
+        cout << "Кіт: Мяу!" << endl;
+    }
+};
+
+class Cow : public Animal {
+public:
+    void sound() override {
+        cout << "Корова: Му-у!" << endl;
+    }
+};
+
+class Shape {
+public:
+    virtual double area() = 0;
+
+    virtual void info() {
+        cout << "Площа = " << area() << endl;
+    }
+
+    virtual ~Shape() {}
+};
+
+class Circle : public Shape {
+private:
+    double radius;
+
+public:
+    Circle(double r) : radius(r) {}
+
+    double area() override {
+        return M_PI * radius * radius;
+    }
+};
+
+class Rectangle : public Shape {
+private:
+    double width, height;
+
+public:
+    Rectangle(double w, double h) : width(w), height(h) {}
+
+    double area() override {
+        return width * height;
+    }
+};
+
+class Triangle : public Shape {
+private:
+    double base, height;
+
+public:
+    Triangle(double b, double h) : base(b), height(h) {}
+
+    double area() override {
+        return 0.5 * base * height;
+    }
+};
+
+int main() {
+
+    SetConsoleCP(65001);
+    SetConsoleOutputCP(65001);
+
+    cout << "=== Поліморфізм Animal ===" << endl;
+
+    Animal* animals[3];
+
+    animals[0] = new Dog();
+    animals[1] = new Cat();
+    animals[2] = new Cow();
+
+    for (int i = 0; i < 3; i++) {
+        animals[i]->sound();
+    }
+
+    cout << "\n=== Робота з фігурами ===" << endl;
+
+    Shape* shape = nullptr;
+
+    int choice;
+
+    cout << "Оберіть фігуру:" << endl;
+    cout << "1 - Circle" << endl;
+    cout << "2 - Rectangle" << endl;
+    cout << "3 - Triangle" << endl;
+    cout << "Ваш вибір: ";
+    cin >> choice;
+
+    if (choice == 1) {
+        double r;
+        cout << "Введіть радіус: ";
+        cin >> r;
+
+        shape = new Circle(r);
+    }
+    else if (choice == 2) {
+        double w, h;
+        cout << "Введіть ширину і висоту: ";
+        cin >> w >> h;
+
+        shape = new Rectangle(w, h);
+    }
+    else if (choice == 3) {
+        double b, h;
+        cout << "Введіть основу і висоту: ";
+        cin >> b >> h;
+
+        shape = new Triangle(b, h);
+    }
+    else {
+        cout << "Невірний вибір!" << endl;
+    }
+
+    if (shape != nullptr) {
+        shape->info();
+    }
+
+    cout << "\n=== Масив фігур ===" << endl;
+
+    vector<Shape*> shapes;
+
+    shapes.push_back(new Circle(3));
+    shapes.push_back(new Rectangle(4, 5));
+    shapes.push_back(new Triangle(6, 2));
+
+    for (Shape* s : shapes) {
+        s->info();
+    }
+
+    for (int i = 0; i < 3; i++) {
+        delete animals[i];
+    }
+
+    delete shape;
+
+    for (Shape* s : shapes) {
+        delete s;
+    }
+
+    return 0;
+}
