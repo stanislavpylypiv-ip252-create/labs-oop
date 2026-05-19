@@ -1,0 +1,79 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <stdexcept>
+#include <Windows.h>
+
+class InsufficientDataException : public std::exception {
+private:
+    std::string message;
+public:
+    explicit InsufficientDataException(const std::string& msg) : message(msg) {}
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
+double calculateAverageFromFile(const std::string& filename, size_t requiredCount = 5) {
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Файл не існує або недоступний: " + filename);
+    }
+
+    std::vector<double> numbers;
+    double num;
+
+    while (file >> num) {
+        numbers.push_back(num);
+    }
+
+    if (!file.eof() && file.fail()) {
+        throw InsufficientDataException("У файлі знайдено некоректні дані (не числа).");
+    }
+
+    if (numbers.size() < requiredCount) {
+        throw InsufficientDataException(
+            "Недостатньо даних у файлі. Знайдено: " + std::to_string(numbers.size()) +
+            ", а потрібно: " + std::to_string(requiredCount)
+        );
+    }
+
+    double sum = 0;
+    for (double n : numbers) {
+        sum += n;
+    }
+
+    return sum / numbers.size();
+}
+
+void testScenario(const std::string& filename) {
+    std::cout << "Тестування файлу: " << filename << std::endl;
+    try {
+        double avg = calculateAverageFromFile(filename, 5);
+        std::cout << "Успіх! Середнє значення: " << avg << std::endl;
+    }
+    catch (const InsufficientDataException& e) {
+        std::cerr << "Помилка даних (Власний виняток): " << e.what() << std::endl;
+    }
+    catch (const std::runtime_error& e) {
+        std::cerr << "Помилка файлової системи (Стандартний виняток): " << e.what() << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Невідома помилка: " << e.what() << std::endl;
+    }
+    std::cout << "----------------------------------------\n";
+}
+
+int main() {
+    setlocale(LC_ALL, "ukr");
+    SetConsoleOutputCP(65001);
+    testScenario("non_existent_file.txt");
+    testScenario("too_few_data.txt");
+    testScenario("invalid_data.txt");
+    testScenario("correct_data.txt");
+
+    return 0;
+}
